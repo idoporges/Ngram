@@ -12,6 +12,7 @@ from nltk.util import ngrams
 from nltk.corpus import gutenberg
 from itertools import islice
 
+
 # Preprocess the text data
 def preprocess_text(text):
     sentences_list = nltk.sent_tokenize(text)
@@ -63,7 +64,7 @@ def train_ngram_lm(tokens, ngram_order):
     # TODO find a good calculation for OOV context
     Probs[('<OOV>',)] = {}
     Probs[('<OOV>',)]['<OOV>'] = 0.1  # 0.999999
-    # too low and perplexity will explode and be uncalculable
+    # too low and perplexity will explode and be incalculable
     # too high and the best perplexity will be awarded to the worst models
     return Probs
 
@@ -149,7 +150,6 @@ if __name__ == "__main__":
 
         # Saving the models
         with open(f'models/Ngram_austen_{n}.pkl', 'wb') as f:
-
             pickle.dump(austen_model_info, f)
 
         with open(f'models/Ngram_bronte_{n}.pkl', 'wb') as f:
