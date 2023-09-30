@@ -1,4 +1,5 @@
 import os
+import shutil
 import nltk
 import pickle
 from collections import defaultdict, Counter
@@ -24,7 +25,7 @@ def extract_tuples(tokens, ngram_order):
 
 
 # Train the n-gram language model
-def train_ngram_lm(tokens, ngram_order):
+def train_ngram_lm(tokens, ngram_order, default_probability):
     model = defaultdict(Counter)
     tuples = extract_tuples(tokens, ngram_order)
 
@@ -52,7 +53,7 @@ def train_ngram_lm(tokens, ngram_order):
 
     # TODO find a good calculation for OOV context
     Probs[('<OOV>',)] = {}
-    Probs[('<OOV>',)]['<OOV>'] = 0.0001  # 0.999999
+    Probs[('<OOV>',)]['<OOV>'] = default_probability
     # too low and perplexity will explode and be incalculable
     # too high and the best perplexity will be awarded to the worst models
     return Probs
@@ -86,7 +87,19 @@ def save_tokens(tokens, filename):
         pickle.dump(set(tokens), f)
 
 
-def main():
+def delete_files_in_folder(folder_path):
+    for root, dirs, files in os.walk(folder_path, topdown=False):
+        for file in files:
+            file_path = os.path.join(root, file)
+            try:
+                os.remove(file_path)
+                print(f"Deleted file: {file_path}")
+            except Exception as e:
+                print(f"Error deleting file {file_path}: {e}")
+
+
+def main(default_probability):
+    delete_files_in_folder("models")
     author = "Austen"
     # Change to folder name. want to train on all Bronte and austen texts.
     train_set = load_text_data("Austen")
@@ -98,7 +111,7 @@ def main():
 
     Ngrams_austen = []
     for n in n_values:
-        Ngram_austen = train_ngram_lm(train_set, n)
+        Ngram_austen = train_ngram_lm(train_set, n, default_probability)
 
         # Creating a dictionary to save model, n-value, and a placeholder for perplexity
         austen_model_info = {
@@ -112,5 +125,3 @@ def main():
         with open(f'models/Ngram_austen_{n}.pkl', 'wb') as f:
             pickle.dump(austen_model_info, f)
 
-if __name__ == "__main__":
-    main()
