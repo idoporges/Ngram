@@ -183,77 +183,34 @@ def generate_text(model, n, max_length=100):
 
 
 if __name__ == "__main__":
+    print("test test push git")
+    model_files = [f for f in os.listdir("models") if f.endswith('.pkl')]
+    perplexity_values = []
+    n_values = []
 
-    # folder_path = "Austen"
-    # Change to folder name. want to train on all Bronte and austen texts.
-    train_set_austen = load_text_data("Austen")
-    train_set_bronte = load_text_data("Bronte")
+    for model_file in model_files:
+        with open(f'models/{model_file}', 'rb') as f:
+            model_info = pickle.load(f)
 
-    # Test sets.
-    test_set_austen = gutenberg.raw("austen-sense.txt")
-    # test_set_austen = load_file_data("Sense.txt")
-    test_set = test_set_austen
+        n_value = model_info['n_value']
+        perplexity = model_info['perplexity']
 
-    n_values = list(range(2, 10))
-    perplexity_values_austen = []
-    perplexity_values_bronte = []
+        n_values.append(n_value)
+        perplexity_values.append(perplexity)
 
-    """
-    # generate
-    for n in n_values:
-        Ngram_austen = train_ngram_lm(train_set_austen, n)
-        text = generate_text(Ngram_austen, n, 30)
-        print("Austen ", n, "-gram: ", text)
-    """
-    # """
-    K = 1
-    # graph:
-    Ngrams_austen = []
-    for n in n_values:
-        Ngram_austen = train_ngram_lm(train_set_austen, n)
-        Ngram_bronte = train_ngram_lm(train_set_bronte, n)
+    # Sort by n_values for plotting
+    sorted_indices = sorted(range(len(n_values)), key=lambda k: n_values[k])
+    perplexity_values = [perplexity_values[i] for i in sorted_indices]
+    n_values = [n_values[i] for i in sorted_indices]
 
-        perplexity_austen = calc_perplexity_batch(Ngram_austen, n, test_set, K)
-        perplexity_values_austen.append(perplexity_austen)
-        perplexity_bronte = calc_perplexity_batch(Ngram_bronte, n, test_set, K)
-        perplexity_values_bronte.append(perplexity_bronte)
+    # Debugging
+    print("n_values: ", n_values)
+    print("perplexity_values: ", perplexity_values)
 
-        # For debugging.
-        print("n = " + str(n))
-        print("perp Austen = " + str(perplexity_values_austen))
-        print("perp Bronte = " + str(perplexity_values_bronte))
-        #########################################
-
-        if perplexity_bronte > perplexity_austen:
-            print("This text is most likely written by Austen.")
-        else:
-            if perplexity_bronte < perplexity_austen:
-                print("This text is most likely written by Bronte.")
-            else:
-                print("This text has an equal probability to have been written by Austen and by Bronte")
-
-    ## Plot the graphs.
-    fig, ((Austen, Bronte), (both, _)) = plt.subplots(2, 2)
-
-    Austen.plot(n_values, perplexity_values_austen)
-    Austen.set_xlabel('n (Order of the Language Model)')
-    Austen.set_ylabel('Perplexity Austen')
-    Austen.set_title('Perplexity Austen vs. n')
-    Austen.grid(True)
-
-    Bronte.plot(n_values, perplexity_values_bronte)
-    Bronte.set_xlabel('n (Order of the Language Model)')
-    Bronte.set_ylabel('Perplexity Bronte')
-    Bronte.set_title('Perplexity Bronte vs. n')
-    Bronte.grid(True)
-
-    both.plot(n_values, perplexity_values_austen)
-    both.plot(n_values, perplexity_values_bronte)
-    both.set_xlabel('n (Order of the Language Model)')
-    both.set_ylabel('Perplexity')
-    both.set_title('Comparison between Austen and Bronte perplexities')
-    both.grid(True)
-
-    plt.tight_layout()
+    # Plotting code
+    plt.plot(n_values, perplexity_values)
+    plt.xlabel('n (Order of the Language Model)')
+    plt.ylabel('Perplexity')
+    plt.title('Perplexity vs. n')
+    plt.grid(True)
     plt.show()
-    # """

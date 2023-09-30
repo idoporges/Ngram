@@ -24,12 +24,20 @@ def preprocess_text(text):
     return tokens
 
 
-def calc_perplexity_batch(model, n, test_set, k, batch_size=50):
+# Load tokens from a pickle file
+def load_tokens(filename):
+    with open(filename, 'rb') as f:
+        return pickle.load(f)
+
+# Check if a word exists in the vocabulary
+def word_exists(word, vocab):
+    return word in vocab
+
+def calc_perplexity_batch(model, n, test_set, k,vocab, batch_size=50):
     tokens = preprocess_text(test_set)
     perplexities = []
     context_OOV_cnt = 0
     word_OOV_cnt = 0
-    OOV_cap = 1000
     for i in range(0, len(tokens) - n, batch_size):
         batch_tokens = tokens[i:i + batch_size]
         batch_perplexity = 1
@@ -39,16 +47,11 @@ def calc_perplexity_batch(model, n, test_set, k, batch_size=50):
             word = batch_tokens[j + n - 1]
 
             if context not in model:
-                probability = model[context][word]
-
-                if context_OOV_cnt >= OOV_cap:
-                    probability = 1
+                probability = model[('<OOV>',)]['<OOV>']
                 context_OOV_cnt += 1
             else:
                 if word not in model[context]:
-                    probability = model[context]['<OOV>']
-                    if word_OOV_cnt >= OOV_cap:
-                        probability = 1
+                    probability = model[('<OOV>',)]['<OOV>']
                     word_OOV_cnt += 1
                 else:
                     probability = model[context][word]
@@ -94,10 +97,10 @@ def generate_text(model, n, max_length=100):
 
 
 if __name__ == "__main__":
-
     # Test sets.
     test_set_austen = gutenberg.raw("austen-sense.txt")
     test_set = test_set_austen
+    vocab = load_tokens('models/vocab.pkl')
     K = 1
     # Loop over all files in the 'models' directory
     for filename in os.listdir('models'):
@@ -111,7 +114,7 @@ if __name__ == "__main__":
                 n_value = loaded_info['n_value']
 
             # Calculate the perplexity
-            perplexity = calc_perplexity_batch(Ngram_model, n_value, test_set, K)
+            perplexity = calc_perplexity_batch(Ngram_model, n_value, test_set, K, vocab)
 
             # Update the perplexity placeholder
             loaded_info['perplexity'] = perplexity

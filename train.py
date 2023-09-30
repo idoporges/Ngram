@@ -12,7 +12,6 @@ from nltk.util import ngrams
 from nltk.corpus import gutenberg
 from itertools import islice
 
-
 # Preprocess the text data
 def preprocess_text(text):
     sentences_list = nltk.sent_tokenize(text)
@@ -28,10 +27,6 @@ def preprocess_text(text):
 # Extract n-grams from the tokenized text
 def extract_tuples(tokens, ngram_order):
     return list(ngrams(tokens, ngram_order))
-
-
-def default_probability(default_prob):
-    return default_prob
 
 
 # Train the n-gram language model
@@ -69,11 +64,6 @@ def train_ngram_lm(tokens, ngram_order):
     return Probs
 
 
-# Load the Gutenberg dataset and preprocess it
-def load_gutenberg_data(text):
-    return preprocess_text(text)
-
-
 def load_file_data(file_path):
     with open(file_path, 'r', errors='ignore') as file:
         text = file.read()
@@ -91,59 +81,30 @@ def load_text_data(folder):
     return tokens
 
 
-def print_first_n_items(model, n):
-    for context, word_probs in islice(model.items(), n):
-        print(f"{context}: {word_probs}")
-
-
-def get_num_of_all_words_from_ngram(model):
-    words = set()
-
-    for context, word_probs in model.items():
-        words.update(word_probs.keys())
-
-    return len(words)
+# Save tokens to a pickle file
+def save_tokens(tokens, filename):
+    with open(filename, 'wb') as f:
+        pickle.dump(set(tokens), f)
 
 
 if __name__ == "__main__":
-
-    # folder_path = "Austen"
+    author = "Austen"
     # Change to folder name. want to train on all Bronte and austen texts.
-    train_set_austen = load_text_data("Austen")
-    train_set_bronte = load_text_data("Bronte")
-
+    train_set = load_text_data("Austen")
+    vocab = extract_tuples(train_set, 1)
+    save_tokens(vocab, 'models/vocab.pkl')
     # Test sets.
-    test_set_austen = gutenberg.raw("austen-sense.txt")
-    # test_set_austen = load_file_data("Sense.txt")
-    test_set = test_set_austen
-
+    test_set = gutenberg.raw("austen-sense.txt")
     n_values = list(range(2, 10))
-
-    """
-    # generate
-    for n in n_values:
-        Ngram_austen = train_ngram_lm(train_set_austen, n)
-        text = generate_text(Ngram_austen, n, 30)
-        print("Austen ", n, "-gram: ", text)
-    """
-    # """
     # graph:
     Ngrams_austen = []
     for n in n_values:
-        Ngram_austen = train_ngram_lm(train_set_austen, n)
-        Ngram_bronte = train_ngram_lm(train_set_bronte, n)
+        Ngram_austen = train_ngram_lm(train_set, n)
 
         # Creating a dictionary to save model, n-value, and a placeholder for perplexity
         austen_model_info = {
             'model': Ngram_austen,
-            'author': "Austen",
-            'n_value': n,
-            'perplexity': None  # Placeholder
-        }
-
-        bronte_model_info = {
-            'model': Ngram_bronte,
-            'author': "Bronte",
+            'author': author,
             'n_value': n,
             'perplexity': None  # Placeholder
         }
@@ -151,7 +112,4 @@ if __name__ == "__main__":
         # Saving the models
         with open(f'models/Ngram_austen_{n}.pkl', 'wb') as f:
             pickle.dump(austen_model_info, f)
-
-        with open(f'models/Ngram_bronte_{n}.pkl', 'wb') as f:
-            pickle.dump(bronte_model_info, f)
     # """
