@@ -52,7 +52,7 @@ def train_ngram_lm(tokens, ngram_order):
 
     # TODO find a good calculation for OOV context
     Probs[('<OOV>',)] = {}
-    Probs[('<OOV>',)]['<OOV>'] = 0.1  # 0.999999
+    Probs[('<OOV>',)]['<OOV>'] = 0.0001  # 0.999999
     # too low and perplexity will explode and be incalculable
     # too high and the best perplexity will be awarded to the worst models
     return Probs
@@ -86,7 +86,7 @@ def save_tokens(tokens, filename):
         pickle.dump(set(tokens), f)
 
 
-if __name__ == "__main__":
+def main():
     author = "Austen"
     # Change to folder name. want to train on all Bronte and austen texts.
     train_set = load_text_data("Austen")
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     save_tokens(vocab, 'models/Vocab/vocab.pkl')
     # Test sets.
     test_set = gutenberg.raw("austen-sense.txt")
-    n_values = list(range(2, 10))
+    n_values = list(range(2, 20))
 
     Ngrams_austen = []
     for n in n_values:
@@ -111,3 +111,6 @@ if __name__ == "__main__":
         # Saving the models
         with open(f'models/Ngram_austen_{n}.pkl', 'wb') as f:
             pickle.dump(austen_model_info, f)
+
+if __name__ == "__main__":
+    main()

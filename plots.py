@@ -46,7 +46,7 @@ def generate_text(model, n, max_length=100):
     return ' '.join(generated_text)
 
 
-if __name__ == "__main__":
+def main():
     model_files = [f for f in os.listdir("models") if f.endswith('.pkl')]
     perplexity_values = []
     n_values = []
@@ -77,3 +77,7 @@ if __name__ == "__main__":
     plt.title('Perplexity vs. n')
     plt.grid(True)
     plt.show()
+
+
+if __name__ == "__main__":
+    main()

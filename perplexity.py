@@ -51,12 +51,11 @@ def calc_perplexity_batch(model, n, test_set, vocab, batch_size=50):
     return average_perplexity
 
 
-if __name__ == "__main__":
+def main():
     # Test sets.
     test_set_austen = gutenberg.raw("austen-sense.txt")
     test_set = test_set_austen
     vocab = load_tokens('models/Vocab/vocab.pkl')
-    K = 1
     # Loop over all files in the 'models' directory
     for filename in os.listdir('models'):
         if filename.endswith('.pkl'):
@@ -70,7 +69,7 @@ if __name__ == "__main__":
                 n_value = loaded_info['n_value']
 
             # Calculate the perplexity
-            perplexity = calc_perplexity_batch(Ngram_model, n_value, test_set, K, vocab)
+            perplexity = calc_perplexity_batch(Ngram_model, n_value, test_set, vocab)
 
             # Update the perplexity placeholder
             loaded_info['perplexity'] = perplexity
@@ -80,3 +79,7 @@ if __name__ == "__main__":
                 pickle.dump(loaded_info, f)
 
             print(f"Updated perplexity for {filename} to {perplexity}")
+
+
+if __name__ == "__main__":
+    main()
