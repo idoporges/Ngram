@@ -1,16 +1,10 @@
-import math
 import os
 import nltk
-import random
-import matplotlib.pyplot as plt
 import pickle
-# nltk.download('punkt')
-# nltk.download('gutenberg')
-from nltk.corpus import gutenberg
 from collections import defaultdict, Counter
 from nltk.util import ngrams
 from nltk.corpus import gutenberg
-from itertools import islice
+
 
 # Preprocess the text data
 def preprocess_text(text):
@@ -70,6 +64,11 @@ def load_file_data(file_path):
     return preprocess_text(text)
 
 
+# Load the Gutenberg dataset and preprocess it
+def load_gutenberg_data(text):
+    return preprocess_text(text)
+
+
 def load_text_data(folder):
     tokens = []
     for file_name in os.listdir(folder):
@@ -92,11 +91,11 @@ if __name__ == "__main__":
     # Change to folder name. want to train on all Bronte and austen texts.
     train_set = load_text_data("Austen")
     vocab = extract_tuples(train_set, 1)
-    save_tokens(vocab, 'models/vocab.pkl')
+    save_tokens(vocab, 'models/Vocab/vocab.pkl')
     # Test sets.
     test_set = gutenberg.raw("austen-sense.txt")
     n_values = list(range(2, 10))
-    # graph:
+
     Ngrams_austen = []
     for n in n_values:
         Ngram_austen = train_ngram_lm(train_set, n)
@@ -112,4 +111,3 @@ if __name__ == "__main__":
         # Saving the models
         with open(f'models/Ngram_austen_{n}.pkl', 'wb') as f:
             pickle.dump(austen_model_info, f)
-    # """
